@@ -1,0 +1,86 @@
+import hashlib
+import rsa
+
+#debit_account = [block.calculate_hash(alice_pubkey), block.calculate_hash(bob_pubkey), block.calculate_hash(charlie_pubkey)]
+alice_keypair = rsa.newkeys(128) # input('Enter the public key for account number of Alice:')
+bob_keypair = rsa.newkeys(128) # input('Enter the public key for account number of bob:')
+charlie_keypair = rsa.newkeys(128)# input('Enter the public key for account number of Charlie:')
+#amount = -1
+
+class transaction:
+    def __init__(self, debit_account, credit_account, amount):
+        self.debit_account = debit_account
+        self.credit_account = credit_account
+        self.amount = amount
+
+        def __str__(selft):
+            return str(debit_account) + 'sent' + str(amount) + 'Rs to' + str(credit_account)
+
+class block:
+    def __init__(self, transactions, prev_hash):
+        self.transactions = transactions
+        self.prev_hash = prev_hash
+        self.nonce = 0   
+        self.hash = self.calculate_hash()
+    
+    def calculate_hash(self):
+        block_header = str(self.transactions) + str(self.prev_hash) + str(self.nonce)
+        block_hash = hashlib.sha256(block_header.encode()).hexdigest()
+        return block_hash
+    
+    def mine_block(self, difficulty):
+        while self.hash[:difficulty] != '0' * difficulty:
+            self.nonce += 1
+            self.hash = self.calculate_hash()
+
+        print('New Block Mined: ', self.hash)
+
+class Blockchain:
+    def __init__(self):
+        self.chain = [self.create_genesis_block()]
+        self.difficulty = 2
+
+    def create_genesis_block(self):
+        return block([], '0')
+    
+    def get_newest_block(self):
+        return self.chain[-1]
+    
+    def add_block(self, new_block):
+        new_block.prev_hash = self.get_newest_block().hash
+        new_block.mine_block(self.difficulty)
+        self.chain.append(new_block)
+
+    def check_validity(self):
+        for i in range(1, len(self.chain)):
+            current_block = self.chain[i]
+            previous_block = self.chain[i-1]
+
+            if current_block.hash != current_block.calculate_hash():
+                return False
+            
+            if current_block.prev_hash != previous_block.hash:
+                return False
+            
+           # if amount.debit_account > 
+
+        return ('Blockchain is valid')
+    
+if __name__ == '__main__':
+    blockchain = Blockchain()
+
+    
+    transaction1 = transaction('Alice', 'Bob', 5)
+    transaction2 = transaction('Bob', 'Charlie', 10)
+
+    print('Account number of Alice: ', hashlib.sha256(str(alice_keypair[0])).hexdigest)
+    print('Account number of Bob: ', hashlib.sha256(str(bob_keypair[0])).hexdigest)
+    print('Account number of Charlie: ', hashlib.sha256(str(charlie_keypair[0])).hexdigest)
+
+    block1 = block([transaction1], '0')
+    blockchain.add_block(block1)
+
+    block2 = block([transaction2], blockchain.get_newest_block().hash)
+    blockchain.add_block(block2)
+
+    print('Checking the validity of Blockchain: ', blockchain.check_validity())
